@@ -6,6 +6,22 @@
 (define defmacro define-macro)
 (define !inc (fn (x) (+ 1 x)))
 (define !dec (fn (x) (- x 1)))
+(define pos? (fn (x) (> x 0)))
+(define neg? (fn (x) (< x 0)))
+(define str string)
+(define concat append)
+(define partial curry)
+(define doseq dolist)
+
+(define (comp)
+  (define (comp-helper col x)
+    (define (iter res col)
+      (if col
+	  (iter ((first col) res) (rest col))
+	  res))
+    (iter x col))
+  (letex (resi (reverse (args)))
+    (partial comp-helper 'resi)))
 
 
 ;; Just playing cool with defn, but the thing is it cannot have a
