@@ -12,6 +12,12 @@
 (define concat append)
 (define partial curry)
 (define doseq dolist)
+(define !count length)
+(define every? for-all)
+(define shuffle randomize)
+
+(define (sort-by f compf col)
+  (sort col (fn (a b) (compf (f a) (f b)))))
 
 (define (comp)
   (define (comp-helper col x)
@@ -42,15 +48,34 @@
   (letex (res (args))
     (curry juxt-helper 'res)))
 
+(define (conj)
+  (append (first (args)) (rest (args))))
+
+;; ugly iterate, can't implement laziness yet
+;; need a pred function to keep the iteration going when (pred value)
+;; is true
 (define (iterate f pred init)
   (define (iter cur res)
     (if (pred cur)
-	(iter (f cur) (cons cur res))
-	(reverse res)))
+	(iter (f cur) (conj res cur))
+	res))
   (iter init '()))
 
-(define (conj)
-  (append (first (args)) (rest (args))))
+(define (take n cols)
+  (define (iter i res col)
+    (if col
+	(if (>= i n)
+	    res
+	    (iter (!inc i) (conj res (first col)) (rest col)))
+	res))
+  (iter 0 '() cols))
+
+(define (drop n cols)
+  (if cols
+      (if (<= n 0)
+	  cols
+	  (drop (!dec n) (rest cols)))
+      cols))
 
 (define (reduce f e)
   (define (iter res col)
@@ -62,8 +87,7 @@
 (define-macro (->>)
   (when (args)
     (if (rest (args))
-	(letn (res (reduce (fn (a b)
-			     (reverse (cons a (reverse b))))
+	(letn (res (reduce (fn (a b) (conj b a))
 			   (first (args))
 			   (rest (args))))
 	  (eval res))
@@ -92,12 +116,14 @@
   (take (- (length col) n) col))
 
 (define (take-while pred col)
-  (if col
-      '()
-      (let (a (first col))
-	(if (pred a)
-	    (cons a (take-while pred (rest col)))
-	    '()))))
+  (define (iter res col)
+    (if col
+	(let (r (first col))
+	  (if (pred r)
+	      (iter (conj res r) (rest col))
+	      res))
+	res))
+  (iter '() col))
 
 (define (drop-while pred col)
   (if-not col
@@ -112,15 +138,19 @@
       (eval (args 1))
       (eval (args 2))))
 
-(define (butlast col) (reverse (rest (reverse col))))
+(define (butlast col)
+  (drop-last 1 col))
 
 (define-macro (when-let)
   (setf (eval (first (args 0))) (eval ((args 0) 1)))
   (if (eval (first (args 0)))
-    (if (= 1 (length (rest (args))))
-	(eval (last (args)))
-	(begin
-	  (dolist (c (butlast (rest (args))))
-	    (eval c))
-	  (eval (last (args)))))
-    nil))
+      (if (= 1 (length (rest (args))))
+	  (eval (last (args)))
+	  (eval (apply begin (rest (args)))))
+      nil))
+
+
+
+
+
+
