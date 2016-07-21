@@ -4,6 +4,9 @@
 (define remove clean)
 (define def define)
 (define defmacro define-macro)
+(define !inc (fn (x) (+ 1 x)))
+(define !dec (fn (x) (- x 1)))
+
 
 ;; Just playing cool with defn, but the thing is it cannot have a
 ;; docstring, but still cool nonetheless ;)
@@ -12,10 +15,23 @@
 		(list (cons (expand fname) (expand binding)))
 		(args))))
 
-;; The macros and functions
-
+;; This one let's you to use (f% (* %1 %2)) as anonymous function, but
+;; sadly you cannot use % since it's a reserved symbol in newlisp
 (define-macro (f%)
   (eval (append '(fn) '((%1 %2 %3 %4 %5 %6)) (args))))
+
+(define (juxt)
+  (define (juxt-helper cols x)
+    (map (fn (f) (f x)) cols))
+  (letex (res (args))
+    (curry juxt-helper 'res)))
+
+(define (iterate f pred init)
+  (define (iter cur res)
+    (if (pred cur)
+	(iter (f cur) (cons cur res))
+	(reverse res)))
+  (iter init '()))
 
 (define (conj)
   (append (first (args)) (rest (args))))
@@ -32,6 +48,18 @@
     (if (rest (args))
 	(letn (res (reduce (fn (a b)
 			     (reverse (cons a (reverse b))))
+			   (first (args))
+			   (rest (args))))
+	  (eval res))
+	(eval (first (args))))))
+
+(define-macro (->)
+  (when (args)
+    (if (rest (args))
+	(letn (res (reduce (fn (a b)
+			     (append (list (first b))
+				     (list a)
+				     (rest b)))
 			   (first (args))
 			   (rest (args))))
 	  (eval res))
