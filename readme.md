@@ -12,7 +12,7 @@ It's only 300K and the resulting executables range from 300-500K. It's fast enou
 And for me, it's important that it includes its runtime in the executables which make it possible 
 for me to have full access to the language from the executables (so I can do evals to the dynamically loaded files, 
 or make the exe watching a folder to be run using a scheduler, and you can still changing those extra files, etc). 
-In short, it's a lisp, it's fast enough, it does my dirty cores, and its fun (rather ugly and inconsistent though).
+In short, it's a lisp, it's fast enough, it does my dirty chores, and its really fun (a bit inconsistent though, but still it's fun, and so much to like here).
 
 Now to make the newlisping experience more clojurish, here's some Clojure's macros and functions I can't 
 live without (I bet you can't live without ->> and ->, and probably think why wouldn't other lisps 
@@ -22,7 +22,7 @@ Obviously there are some adjustment in the behaviour of the macros/functions, bu
 
 #### Roadmap
 
-- Macros : ->>, ->, if-let, when-let, f# (as an alias for anonymous function, so you can still use %, %2, etc).
+- Macros : ->>, ->, if-let, when-let, f% (as an alias for anonymous function, so you can still use %1, %2, etc).
 - Functions : keep, map-indexed (I renamed it to mapi and keepi), and many others.
 
 #### Need help!!
