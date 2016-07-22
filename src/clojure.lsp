@@ -29,19 +29,19 @@
   (letex (resi (reverse (args)))
     (partial comp-helper 'resi)))
 
-
-;; Just playing cool with defn, but the thing is it cannot have a
-;; docstring, but still cool nonetheless ;)
-(defmacro (defn fname binding)
+(define-macro (defn fname binding)
   (eval (append '(define)
 		(list (cons (expand fname) (expand binding)))
 		(args))))
 
-;; This one let's you to use (f% (* %1 %2)) as anonymous function, but
-;; sadly you cannot use % since it's a reserved symbol in newlisp
+
+;; Just playing cool with defn, but the thing is it cannot have a
+;; docstring, but still cool nonetheless ;)
 (define-macro (f%)
   (eval (append '(fn) '((%1 %2 %3 %4 %5 %6)) (args))))
 
+;; This one let's you to use (f% (* %1 %2)) as anonymous function, but
+;; sadly you cannot use % since it's a reserved symbol in newlisp
 (define (juxt)
   (define (juxt-helper cols x)
     (map (fn (f) (f x)) cols))
@@ -51,9 +51,6 @@
 (define (conj)
   (append (first (args)) (rest (args))))
 
-;; ugly iterate, can't implement laziness yet
-;; need a pred function to keep the iteration going when (pred value)
-;; is true
 (define (iterate f pred init)
   (define (iter cur res)
     (if (pred cur)
@@ -61,6 +58,9 @@
 	res))
   (iter init '()))
 
+;; ugly iterate, can't implement laziness yet
+;; need a pred function to keep the iteration going when (pred value)
+;; is true
 (define (take n cols)
   (define (iter i res col)
     (if col
@@ -149,8 +149,9 @@
 	  (eval (apply begin (rest (args)))))
       nil))
 
+(define-macro (when-not)
+  (eval (concat (list 'when (eval (not (first (args)))))
+		(rest (args)))))
 
-
-
-
-
+(define-macro (!apply)
+  (eval (concat (butlast (args)) (eval (last (args))))))
